@@ -1,0 +1,398 @@
+{
+	"files": [
+		{
+			"name": "h/avi.h",
+			"schemes": [
+				{
+					"name": "AVI",
+					"type": "struct RIFFHeaders",
+					"var": "avi",
+					"address": 0,
+					"patterns": [
+						".+\\.avi$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/bitmap.h",
+			"schemes": [
+				{
+					"name": "Bitmap",
+					"type": "struct BITMAPFILEHEADER",
+					"var": "bitmap",
+					"address": 0,
+					"patterns": [
+						".+\\.bmp$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/cab.h",
+			"schemes": [
+				{
+					"name": "CAB",
+					"type": "struct CAB_File",
+					"var": "cab",
+					"address": 0,
+					"patterns": [
+						".+\\.cab$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/cda.h"
+		},
+		{
+			"name": "h/cdfs.h",
+			"schemes": [
+				{
+					"name": "CDFS",
+					"type": "struct CDFS",
+					"var": "cdfs",
+					"address": 0,
+					"patterns": [
+						"##cdfs##"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/chm.h",
+			"schemes": [
+				{
+					"name": "CHM",
+					"type": "struct CHMHeader",
+					"var": "chm",
+					"address": 0,
+					"patterns": [
+						".+\\.chm$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/elf.h"
+		},
+		{
+			"name": "h/emf.h",
+			"schemes": [
+				{
+					"name": "EMF",
+					"type": "struct EmfHeader",
+					"var": "emf",
+					"address": 0,
+					"patterns": [
+						".+\\.emf$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/eps.h",
+			"schemes": [
+				{
+					"name": "EPS",
+					"type": "struct EPS_File",
+					"var": "eps",
+					"address": 0,
+					"patterns": [
+						".+\\.eps$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/exfat.h"
+		},
+		{
+			"name": "h/fat32.h"
+		},
+		{
+			"name": "h/garmin_img.h"
+		},
+		{
+			"name": "h/gif.h",
+			"schemes": [
+				{
+					"name": "GIF",
+					"type": "struct GIF_DATA_STREAM",
+					"var": "gif",
+					"address": 0,
+					"patterns": [
+						".+\\.gif$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/hdd.h"
+		},
+		{
+			"name": "h/icc.h",
+			"schemes": [
+				{
+					"name": "ICC",
+					"type": "struct ICC",
+					"var": "icc",
+					"address": 0,
+					"patterns": [
+						".+\\.icc$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/jpg.h",
+			"schemes": [
+				{
+					"name": "JPEG",
+					"type": "struct JpegFile",
+					"var": "jpg",
+					"address": 0,
+					"patterns": [
+						".+\\.(jpg|jpeg)$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/mbr.h"
+		},
+		{
+			"name": "h/messagepack.h"
+		},
+		{
+			"name": "h/mp3.h",
+			"schemes": [
+				{
+					"name": "MP3",
+					"type": "struct Mp3File",
+					"var": "mp3",
+					"address": 0,
+					"patterns": [
+						".+\\.mp3$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/ntfs.h",
+			"schemes": [
+				{
+					"name": "NTFS",
+					"type": "struct NTFS",
+					"var": "ntfs",
+					"address": 0,
+					"patterns": [
+						"##ntfs##"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/pal.h",
+			"schemes": [
+				{
+					"name": "PAL",
+					"type": "struct PAL_File",
+					"var": "pal",
+					"address": 0,
+					"patterns": [
+						".+\\.pal$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/pcx.h",
+			"schemes": [
+				{
+					"name": "PCX",
+					"type": "struct PCX_Header",
+					"var": "pcx",
+					"address": 0,
+					"patterns": [
+						".+\\.pcx$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/pe.h",
+			"schemes": [
+				{
+					"name": "Portable Executable",
+					"type": "struct IMAGE_DOS_HEADER",
+					"var": "dos_header",
+					"address": 0,
+					"patterns": [
+						".+\\.(exe|dll|sys|ocx)$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/pic.h",
+			"schemes": [
+				{
+					"name": "PIC",
+					"type": "struct PIC_File",
+					"var": "pic",
+					"address": 0,
+					"patterns": [
+						".+\\.pic$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/png.h",
+			"schemes": [
+				{
+					"name": "PNG",
+					"type": "struct PNG_FILE",
+					"var": "png",
+					"address": 0,
+					"patterns": [
+						".+\\.png$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/psd.h",
+			"schemes": [
+				{
+					"name": "Photoshop PSD",
+					"type": "struct PSD",
+					"var": "psd",
+					"address": 0,
+					"patterns": [
+						".+\\.psd$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/rar.h",
+			"schemes": [
+				{
+					"name": "RAR",
+					"type": "struct RarFile",
+					"var": "rar",
+					"address": 0,
+					"patterns": [
+						".+\\.rar$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/stddefs.h"
+		},
+		{
+			"name": "h/strings.h"
+		},
+		{
+			"name": "h/tga.h",
+			"schemes": [
+				{
+					"name": "TGA",
+					"type": "struct TGA_File",
+					"var": "tga",
+					"address": 0,
+					"patterns": [
+						".+\\.tga$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/tiff.h",
+			"schemes": [
+				{
+					"name": "TIFF",
+					"type": "struct TiffFile",
+					"var": "tiff",
+					"address": 0,
+					"patterns": [
+						".+\\.tiff?$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/vhd.h",
+			"schemes": [
+				{
+					"name": "VHD",
+					"type": "struct VHD_File",
+					"var": "vhd",
+					"address": 0,
+					"patterns": [
+						".+\\.vhd$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/wav.h",
+			"schemes": [
+				{
+					"name": "WAV",
+					"type": "struct WavHeader",
+					"var": "wav",
+					"address": 0,
+					"patterns": [
+						".+\\.wav$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/qoi.h",
+			"schemes": [
+				{
+					"name": "QOI",
+					"type": "struct QOI_FILE",
+					"var": "qoi",
+					"address": 0,
+					"patterns": [
+						".+\\.qoi$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/webp.h",
+			"schemes": [
+				{
+					"name": "WEBP",
+					"type": "struct Webp",
+					"var": "webp",
+					"address": 0,
+					"patterns": [
+						".+\\.webp$"
+					]
+				}
+			]
+		},
+		{
+			"name": "h/zip.h",
+			"schemes": [
+				{
+					"name": "ZIP",
+					"type": "struct ZipFile",
+					"var": "zip",
+					"address": 0,
+					"patterns": [
+						".+\\.zip$"
+					]
+				}
+			]
+		}
+	]
+}
