@@ -14,11 +14,12 @@ A number of definitions are usually packed into one or more *structure definitio
 
 Starting from version 7.09, Hex Editor Neo is capable of automatically synchronizing a local Structure Library with this repository. Two synchronization levels are supported:
 
-:   **Release**
-    Hex Editor Neo synchronizes with latest repository release. This is the default synchronization level.
+### **Release**
 
-:   **Head**
-    Hex Editor Neo always synchronizes with latest commit.
+Hex Editor Neo synchronizes with latest repository release. This is the default synchronization level.
+
+### **Head**
+Hex Editor Neo always synchronizes with latest commit.
 
 ## Repository Structure
 
