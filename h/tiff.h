@@ -231,7 +231,12 @@ struct TIFF_IMAGE_FILE_DIRECTORY
 {
 	WORD nIFDEntriesNumber;
 	TIFF_IMAGE_FILE_DIRECTORY_ENTRY ifd_entries[nIFDEntriesNumber];
-	ULONG next_ifd as TIFF_IMAGE_FILE_DIRECTORY *(nBeginning);
+	ULONG next_ifd_ptr;
+	if(next_ifd_ptr != 0)
+	{
+		$remove_to(ref(next_ifd_ptr));
+		ULONG next_ifd as TIFF_IMAGE_FILE_DIRECTORY *(nBeginning);
+	}
 };
 
 
@@ -451,6 +456,7 @@ struct TIFF_IMAGE_FILE_DIRECTORY_ENTRY_LE
 // IFD
 struct TIFF_IMAGE_FILE_DIRECTORY_LE
 {
+#pragma byte_order(LittleEndian)
 	if (current_offset != nBeginning)
 	{
 		WORD nIFDEntriesNumber;
@@ -458,14 +464,17 @@ struct TIFF_IMAGE_FILE_DIRECTORY_LE
 		ULONG next_ifd as TIFF_IMAGE_FILE_DIRECTORY_LE *(nBeginning);
 		//DWORD								next_ifd;
 	}
+#pragma byte_order(BigEndian)
 };
 
 struct TIFF_IMAGE_FILE_HEADER_CONT_LE
 {
+#pragma byte_order(LittleEndian)
 	// little endian
 	USHORT wTiffTag;
 	$assert(wTiffTag == 0x2A, "Invalid TIFF file");
 	ULONG	ifd as TIFF_IMAGE_FILE_DIRECTORY_LE *(nBeginning);
+#pragma byte_order(BigEndian)
 };
 
 struct TIFF_IMAGE_FILE_HEADER_CONT
@@ -480,6 +489,7 @@ struct TIFF_IMAGE_FILE_HEADER_CONT
 
 struct TIFF_IMAGE_FILE_HEADER
 {
+	var nBeginning = current_offset;
 	BYTE	nByteOrder[2];
 
 	// fork for endianness
@@ -491,6 +501,5 @@ struct TIFF_IMAGE_FILE_HEADER
 
 public struct TiffFile
 {
-	var nBeginning = current_offset;
 	TIFF_IMAGE_FILE_HEADER ifh;
 };

@@ -4,11 +4,33 @@
 
 // Hex Editor Neo's Structure Viewer sample declaration file
 #pragma once
-#pragma script("search_jpg_frame.js")
 
 // used by EXIF - see APP1_EXIF
 #include "tiff.h"
 #include "icc.h"
+
+javascript
+{
+	const sel = document.CreateEmptySelection();
+	sel.AddRange(0, document.FileSize);
+	
+	const pattern = new Uint8Array([0xff]);
+	
+	function JS_SearchForJpegFrame(offset_start)
+	{
+		return document.Find(pattern, sel, offset_start, false, false);
+	}
+
+	function GetDocumentSize()
+	{
+		return document.FileSize;
+	}
+	
+	function convToString(bytes)
+	{
+		return bytes.split('\0').join("");
+	}
+}
 
 enum JpegMarker : BYTE
 {
@@ -106,7 +128,7 @@ struct TempBlock
 
 struct DHT_Element
 {
-	if (nDHTLen <= 0)
+	if (nDHTLen <= 0 || current_offset >= end_offset)
 		$break_array(false);
 
 	BYTE nTableClass : 4;
@@ -114,10 +136,11 @@ struct DHT_Element
 	BYTE lengths[16];
 
 	var nTotalSLASize = 0;
-	// TODO:
-	//for(i; i<16; ++i)
-	// nTotalSLASize+=lengths[i];
-	TempBlock blocks[16];
+	var i = 0;
+	for(i = 0; i<16; i=i+1)
+	{
+		nTotalSLASize=nTotalSLASize + lengths[i];
+	}
 	BYTE sla[nTotalSLASize];
 };
 
@@ -125,8 +148,8 @@ struct DHT_Element
 struct DHT
 {
 	WORD wHeaderLength;
-
 	var nDHTLen = wHeaderLength - 2;
+	var end_offset = current_offset + nDHTLen;
 	[noindex] DHT_Element elements[*];
 };
 
@@ -279,11 +302,11 @@ struct APP0
 {
 	WORD wHeaderLength;
 	char type[5];
-
 	var nSizeUsed = 0;
-	switch (type)
+
+	switch (convToString(type))
 	{
-	case 'JFIF':
+	case "JFIF":
 		WORD wVersion;
 		BYTE nUnits;
 		WORD wDensityX;
@@ -293,7 +316,7 @@ struct APP0
 
 		RGB rgbs[nThumbnailX * nThumbnailY];
 		break;
-	case 'JFXX':
+	case "JFXX":
 		JFXX_ExtCode nExtensionCode;
 		if (nExtensionCode == ExtCode_Thumbnail_JPEG)
 		{
@@ -301,7 +324,7 @@ struct APP0
 			JpegFile thumbnail;
 		}
 		break;
-	case 'II':case 'MM':
+	case "II":case "MM":
 		// TODO: wrong offset -> read only 2 bytes!!! type[5] read 5!!!
 		DWORD BlockStart;
 		char Signature[8];
@@ -315,31 +338,47 @@ struct APP0
 
 struct APP1_EXIF
 {
+	var exif_offset_start = current_offset;
 	WORD wHeaderLength;
 	char exif_header[6]; // 'EXIF00'
 
-	// TODO: check if needed
-	if (exif_header != "EXIF" && exif_header != "META")
-		$print("warning:", "EXIF header is wrong");
-
-	TIFF_IMAGE_FILE_HEADER tiff;
+	//TODO: META
+	//https://www.media.mit.edu/pia/Research/deepview/exif.html
+	var strHeader = convToString(exif_header);
+	switch (strHeader)
+	{
+	case "Exif":
+	case "EXIF":
+		TIFF_IMAGE_FILE_HEADER tiff;
+		$shift_by(exif_offset_start - current_offset);
+		$shift_by(wHeaderLength);
+		break;
+	default:
+		BYTE data[wHeaderLength - 8];
+		break;
+	}
 };
 
 struct Stim
 {
 	WORD wHeaderLength;
+	BYTE Data[wHeaderLength- sizeof(wHeaderLength)];
 };
 
 public struct JpegChunk
 {
 	BYTE marker;
-	$assert(marker == 0xff, "Hex editor is unable to parse file: wrong marker");
+	$assert(marker == 0xff, "Invalid chunk marker");
 	JpegMarker marker2;
 
 	switch (marker2)
 	{
+	case M_SOI: //no data
+	case M_EOI:
+		break;
 	case M_SOS:
 		SOS sstart_of_scan;
+		BYTE ImageData[GetDocumentSize() - current_offset - 2];
 		break;
 	case M_DHT:
 		DHT huffman_table;
@@ -374,7 +413,14 @@ public struct JpegChunk
 		APP1_EXIF app1;
 		break;
 	case M_APP2:
+		var icc_offset_start = current_offset;
+		USHORT size;
+		char adobe_header[12];
+		char padding[2];
+//		BYTE Data[size - sizeof(size)];
 		ICC icc_profile;
+		$shift_by(icc_offset_start - current_offset);
+		$shift_by(size);
 		break;
 
 		//case M_APP12: // OLYMPUS Digital Camera Information
@@ -386,16 +432,30 @@ public struct JpegChunk
 	// "Photoshop IRB"
 		Stim stim;
 		break;
-		//case M_APP14: // Adobe segment Ver.100 Flags 
-		// // "Adobe"
-		// break;
+	case M_APP14: // Adobe segment Ver.100 Flags 
+		USHORT size;
+		char adobe_header[6]; // 'Adobe'
+		BYTE DCTEncodeVersion;
+		BYTE APP14Flags0;
+		BYTE APP14Flags1;
+		enum ColorTransform : BYTE
+		{
+			Unknown,
+			YCbCr,
+			YCCK
+		}color_transform;
+		BYTE padding[size - 12];
+		 break;
+	default:
+		USHORT size;
+		BYTE Data[size - sizeof(size)];
 	}
 };
 
 struct JpegFileChunk
 {
 	var nFrameOffset = JS_SearchForJpegFrame(nCurrentOffset);
-	if (nFrameOffset != -1) // TODO: 1000 is only for debug!!!
+	if (nFrameOffset != -1)
 	{
 		var nWasOffset = current_offset;
 		if (nFrameOffset < current_offset)
@@ -419,5 +479,5 @@ struct JpegFileChunk
 public struct JpegFile
 {
 	var nCurrentOffset = 0;
-	JpegFileChunk chunks[3];
+	JpegFileChunk chunks[*];
 };
