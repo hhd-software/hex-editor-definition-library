@@ -69,7 +69,7 @@ union DOSTIME
 	{
 		WORD second : 5;	// second divided by 2!
 		WORD minute : 6;  // 0-59
-		WORD year : 5;	// 0-23
+		WORD hour : 5;	// 0-23
 	} packed;
 };
 
