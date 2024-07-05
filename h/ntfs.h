@@ -159,8 +159,19 @@ struct ATTR_HEADER_NON_RESIDENT
 	ULONGLONG IniSize;
 };
 
-
 struct ATTR_STANDARD_INFORMATION
+{
+	ULONGLONG CreateTime;
+	ULONGLONG AlterTime;
+	ULONGLONG MFTTime;
+	ULONGLONG ReadTime;
+	DWORD Permission;
+	DWORD MaxVersionNo;
+	DWORD VersionNo;
+	DWORD ClassId;
+};
+
+struct ATTR_STANDARD_INFORMATION_2K
 {
 	ULONGLONG CreateTime;
 	ULONGLONG AlterTime;
@@ -301,7 +312,15 @@ public struct MFTEntry
 			switch (dwHeader)
 			{
 			case ATTR_TYPE_STANDARD_INFORMATION:// 0x10
-				ATTR_STANDARD_INFORMATION info;
+                switch (header.TotalSize)
+				{
+					case 72:
+						ATTR_STANDARD_INFORMATION info;
+						break;
+					default:
+						ATTR_STANDARD_INFORMATION_2K info_2k;
+					    break;
+				}
 				break;
 			case ATTR_TYPE_ATTRIBUTE_LIST:// 0x20
 			//ATTR_ATTRIBUTE_LIST list;
