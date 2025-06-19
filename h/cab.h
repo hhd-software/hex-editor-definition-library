@@ -62,7 +62,8 @@ struct CFFOLDER
 	DWORD coffCabStart as CFDATA_ARRAY *; // offset of the first CFDATA block in this folder 
 	WORD cCFData; // number of CFDATA blocks in this folder 
 	WORD typeCompress; // compression type indicator 
-	BYTE abReserve[header.cbCFFolder]; // (optional) per-folder reserved area 
+	if (header.flags & cfhdrRESERVE_PRESENT)
+		BYTE abReserve[header.cbCFFolder]; // (optional) per-folder reserved area
 };
 
 enum CffileAttributes : WORD
