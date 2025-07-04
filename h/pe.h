@@ -166,12 +166,12 @@ union IMAGE_THUNK_DATA32
 
 struct IMAGE_THUNK_DATA64ARRAY
 {
-	[noindex] IMAGE_THUNK_DATA64 arr[*];
+	[noindex] IMAGE_THUNK_DATA64 arr[10000];
 };
 
 struct IMAGE_THUNK_DATA32ARRAY
 {
-	[noindex] IMAGE_THUNK_DATA32 arr[*];
+	[noindex] IMAGE_THUNK_DATA32 arr[10000];
 };
 
 struct FUNCTION_ADDRESS_TABLE
@@ -238,20 +238,28 @@ public struct IMAGE_EXPORT_DIRECTORY
 	{
 		DWORD AddressOfFunctionsRva;     // RVA from base of image
 		if (AddressOfFunctionsRva)
-			DWORD functions as FUNCTION_ADDRESS_TABLE *(int(RvaToPaBiased(AddressOfFunctionsRva)));
+		{
+			$assert(NumberOfFunctions < 10000, "NumberOfFunctions field seems to be invalid", false);
+			if (NumberOfFunctions < 10000)
+				DWORD functions as FUNCTION_ADDRESS_TABLE *(int(RvaToPaBiased(AddressOfFunctionsRva)));
+		}
 	} AddressOfFunctions;
 
 	union
 	{
 		DWORD AddressOfNamesRva;         // RVA from base of image
 		if (AddressOfNamesRva)
-			DWORD names as FUNCTION_NAME_TABLE *(int(RvaToPaBiased(AddressOfNamesRva)));
+		{
+			$assert(NumberOfNames < 10000, "NumberOfNames field seems to be invalid", false);
+			if (NumberOfNames < 10000)
+				DWORD names as FUNCTION_NAME_TABLE *(int(RvaToPaBiased(AddressOfNamesRva)));
+		}
 	} AddressOfNames;
 
 	union
 	{
 		DWORD AddressOfNameOrdinalsRva;  // RVA from base of image
-		if (AddressOfNameOrdinalsRva)
+		if (AddressOfNameOrdinalsRva && NumberOfFunctions < 10000)
 			DWORD ordinals as FUNCTION_ORDINAL_TABLE *(int(RvaToPaBiased(AddressOfNameOrdinalsRva)));
 	} AddressOfNameOrdinals;
 };
@@ -369,56 +377,58 @@ struct IMAGE_BASE_RELOCATION
 	DWORD SizeOfBlock;
 
 	var CountOfRelocations = (SizeOfBlock - 8) / sizeof(WORD);
-
-	[noindex] struct RelocFixup
+	$assert(CountOfRelocations <= 10000, "Invalid IMAGE_BASE_RELOCATION structure", false);
+	if (CountOfRelocations <= 10000)
 	{
-	hidden:
-		// bitfields!!!
-		BYTE nFixupAddress;
-		BYTE nType;
-	visible:
-		var type_ = (nType >> 4);
-		switch (type_)
+		[noindex] struct RelocFixup
 		{
-		case IMAGE_REL_BASED_ABSOLUTE:
-			$print("type", "Absolute");
-			break;
-		case IMAGE_REL_BASED_HIGH:
-			$print("type", "High");
-			break;
-		case IMAGE_REL_BASED_LOW:
-			$print("type", "Low");
-			break;
-		case IMAGE_REL_BASED_HIGHLOW:
-			$print("type", "HighLow");
-			break;
-		case IMAGE_REL_BASED_HIGHADJ:
-			$print("type", "HighAdj");
-			break;
-		case IMAGE_REL_BASED_MIPS_JMPADDR:
-			$print("type", "MipsJmpAddr/ArmMov32/RISCV_HIGH20");
-			break;
-		case IMAGE_REL_BASED_THUMB_MOV32:
-			$print("type", "Thumb MOVW MOVT/RISCV_LOW12I");
-			break;
-		case IMAGE_REL_BASED_RISCV_LOW12S:
-			$print("type", "RISCV_LOW12S");
-			break;
-		case IMAGE_REL_BASED_IA64_IMM64:
-			$print("type", "Ia64Imm64");
-			break;
-		case IMAGE_REL_BASED_DIR64:
-			$print("type", "Dir64");
-			break;
-		default:
-			$print("type", type_);
-		}
+		hidden:
+			// bitfields!!!
+			BYTE nFixupAddress;
+			BYTE nType;
+		visible:
+			var type_ = (nType >> 4);
+			switch (type_)
+			{
+			case IMAGE_REL_BASED_ABSOLUTE:
+				$print("type", "Absolute");
+				break;
+			case IMAGE_REL_BASED_HIGH:
+				$print("type", "High");
+				break;
+			case IMAGE_REL_BASED_LOW:
+				$print("type", "Low");
+				break;
+			case IMAGE_REL_BASED_HIGHLOW:
+				$print("type", "HighLow");
+				break;
+			case IMAGE_REL_BASED_HIGHADJ:
+				$print("type", "HighAdj");
+				break;
+			case IMAGE_REL_BASED_MIPS_JMPADDR:
+				$print("type", "MipsJmpAddr/ArmMov32/RISCV_HIGH20");
+				break;
+			case IMAGE_REL_BASED_THUMB_MOV32:
+				$print("type", "Thumb MOVW MOVT/RISCV_LOW12I");
+				break;
+			case IMAGE_REL_BASED_RISCV_LOW12S:
+				$print("type", "RISCV_LOW12S");
+				break;
+			case IMAGE_REL_BASED_IA64_IMM64:
+				$print("type", "Ia64Imm64");
+				break;
+			case IMAGE_REL_BASED_DIR64:
+				$print("type", "Dir64");
+				break;
+			default:
+				$print("type", type_);
+			}
 
-		// warning: read documentation.
-		// For example: in case of IMAGE_REL_BASED_HIGHLOW this value should be added to VirtualAddress
-		$print("RealFixupAddress", nFixupAddress | ((nType & 0x0f) << 8));
-	} TypeOffset[CountOfRelocations];
-
+			// warning: read documentation.
+			// For example: in case of IMAGE_REL_BASED_HIGHLOW this value should be added to VirtualAddress
+			$print("RealFixupAddress", nFixupAddress | ((nType & 0x0f) << 8));
+		} TypeOffset[CountOfRelocations];
+	}
 	sz = sz - (current_offset - this);
 };
 
