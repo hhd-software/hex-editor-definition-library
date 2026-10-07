@@ -400,12 +400,17 @@ enum ElfVersion :Elf32_Word
 	EV_CURRENT = 1
 };
 
-struct ELF_HEADER
+public struct ELF_HEADER
 {
 	ElfIdent ident;
 
 	$assert(ident.pre_id == 0x7f, "Not an ELF file");
 	$assert(ident.id == "ELF", "Not an ELF file");
+
+	if (ident.data_encoding == ELFDATA2MSB)
+	{
+		#pragma byte_order(BigEndian)
+	}
 
 	ElfType type;
 	ElfMachine machine;
