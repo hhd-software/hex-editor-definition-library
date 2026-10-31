@@ -5,6 +5,7 @@
 // Hex Editor Neo's Structure Viewer sample declaration file
 #include <stddefs.h>
 
+//32 bit
 typedef uint32 Elf32_Addr;
 typedef uint32 Elf32_Off;
 typedef uint32 Elf32_SWord;
@@ -43,6 +44,7 @@ enum IdentElfOS :BYTE
 	ELFOSABI_NONE = 0, //
 	ELFOSABI_HPUX = 1, // HP-UX 
 	ELFOSABI_NETBSD = 2, // NetBSD 
+	ELFOSABI_LINUX = 3, // Linux
 	ELFOSABI_SOLARIS = 6, // Sun Solaris 
 	ELFOSABI_AIX = 7, // AIX 
 	ELFOSABI_IRIX = 8, // IRIX 
@@ -52,7 +54,9 @@ enum IdentElfOS :BYTE
 	ELFOSABI_OPENBSD = 12, // Open BSD 
 	ELFOSABI_OPENVMS = 13, // Open VMS 
 	ELFOSABI_NSK = 14, // HP Non-Stop Kernel 
-	ELFOSABI_AROS = 15 // Amiga Research OS
+	ELFOSABI_AROS = 15, // Amiga Research OS
+	ELFOSABI_ARM = 97, //ARM
+	ELFOSABI_STANDALONE = 255
 };
 
 
@@ -88,7 +92,36 @@ enum SectionHeaderType :Elf32_Word
 	SHT_REL = 9,
 	SHT_SHLIB = 10,
 	SHT_DYNSYM = 11,
-	SHT_LOPROC = 0x70000000,
+
+	//Oracle
+	SUNW_SYMNSORT = 0X6FFFFFEC,
+	SUNW_PHNAME = 0X6FFFFFED,
+	SUNW_ANCILLARY = 0X6FFFFFEE,
+	SUNW_CAPCHAIN = 0X6FFFFFEF,
+	SUNW_CAPINFO = 0X6FFFFFF0,
+	SUNW_SYMSORT = 0X6FFFFFF1,
+	SUNW_TLSSORT = 0X6FFFFFF2,
+	SUNW_LDYNSYM = 0X6FFFFFF3,
+	SUNW_DOF = 0X6FFFFFF4,
+	SUNW_CAP = 0X6FFFFFF5,
+	SUNW_SIGNATURE = 0X6FFFFFF6,
+	SUNW_ANNOTATE = 0X6FFFFFF7,
+	SUNW_DEBUGSTR = 0X6FFFFFF8,
+	SUNW_DEBUG = 0X6FFFFFF9,
+	SUNW_MOVE = 0X6FFFFFFA,
+	SUNW_COMDAT = 0X6FFFFFFB,
+	SUNW_SYMINFO = 0X6FFFFFFC,
+	SUNW_VERDEF = 0X6FFFFFFD,
+	SUNW_VERNEED = 0X6FFFFFFE,
+	SUNW_VERSYM = 0X6FFFFFFF,
+	//SHT_LOPROC = 0x70000000,
+	SPARC_GOTDATA = 0X70000000,
+	AMD64_UNWIND = 0X70000001,
+	ARM_PREEMPTMAP = 0X70000002,
+	ARM_ATTRIBUTES = 0X70000003,
+	ARM_DEBUGOVERLAY = 0X70000004,
+	ARM_OVERLAYSECTION = 0X70000005,
+	
 	SHT_HIPROC = 0x7fffffff,
 	SHT_LOUSER = 0x80000000,
 	SHT_HIUSER = 0xffffffff
@@ -99,6 +132,33 @@ enum SectionHeaderFlags :Elf32_Word
 	SHF_WRITE = 1,
 	SHF_ALLOC = 2,
 	SHF_EXECINSTR = 4,
+	SHF_MERGE = 0x10,
+	SHF_STRINGS = 0x20,
+	SHF_INFO_LINK = 0x40,
+	SHF_LINK_ORDER = 0x80,
+	SHF_OS_NONCONFORMING = 0x100,
+	SHF_GROUP = 0x200,
+	SHF_TLS = 0x400,
+	SHF_COMPRESSED = 0x800,
+	SHF_MASKOS = 0x0FF00000,
+	SHF_MASKPROC = 0xf0000000
+};
+
+enum SectionHeaderFlags64 :Elf64_QWord
+{
+	SHF_WRITE = 1,
+	SHF_ALLOC = 2,
+	SHF_EXECINSTR = 4,
+	SHF_MERGE = 0x10,
+	SHF_STRINGS = 0x20,
+	SHF_INFO_LINK  = 0x40,
+	SHF_LINK_ORDER = 0x80,
+	SHF_OS_NON_CONFORMING = 0x100,
+	SHF_GROUP = 0x200,
+	SHF_TLS = 0x400,
+	SHF_ORDERED = 0x04000000,
+	SHF_EXCLUDE = 0x08000000,
+	SHF_MASK_OS = 0x0FF00000,
 	SHF_MASKPROC = 0xf0000000
 };
 
@@ -109,10 +169,438 @@ struct ElfSymbolSection64;
 struct ElfStringSection32;
 struct ElfStringSection64;
 
+case_union DynamicValue64
+{
+	case d_tag == DT_FLAGS:
+		enum EFlags64 : Elf64_QWord
+		{
+			DF_ORIGIN = 0x00000001,
+			DF_SYMBOLIC = 0x00000002,
+			DF_TEXTREL = 0x00000004,
+			DF_BIND_NOW = 0x00000008,
+			DF_STATIC_TLS = 0x00000010
+		}d_val;
+		break;
+	case d_tag == DT_FLAGS_1:
+		enum EFlags64_1 : Elf64_QWord
+		{
+			DF_1_NOW = 0x00000001,
+			DF_1_GLOBAL = 0x00000002,
+			DF_1_GROUP = 0x00000004,
+			DF_1_NODELETE = 0x00000008,
+			DF_1_LOADFLTR = 0x00000010,
+			DF_1_INITFIRST = 0x00000020,
+			DF_1_NOOPEN = 0x00000040,
+			DF_1_ORIGIN = 0x00000080,
+			DF_1_DIRECT = 0x00000100,
+			DF_1_TRANS = 0x00000200,
+			DF_1_INTERPOSE = 0x00000400,
+			DF_1_NODEFLIB = 0x00000800,
+			DF_1_NODUMP = 0x00001000,
+			DF_1_CONFALT = 0x00002000,
+			DF_1_ENDFILTEE = 0x00004000,
+			DF_1_DISPRELDNE = 0x00008000,
+			DF_1_DISPRELPND = 0x00010000,
+			DF_1_NODIRECT = 0x00020000,
+			DF_1_IGNMULDEF = 0x00040000,
+			DF_1_NOKSYMS = 0x00080000,
+			DF_1_NOHDR = 0x00100000,
+			DF_1_EDITED = 0x00200000,
+			DF_1_NORELOC = 0x00400000,
+			DF_1_SYMINTPOSE = 0x00800000,
+			DF_1_GLOBAUDIT = 0x01000000,
+			DF_1_SINGLETON = 0x02000000,
+			DF_1_STUB = 0x04000000,
+			DF_1_PIE = 0x08000000
+		}d_val;
+		break;
+	case d_tag == DT_NEEDED || d_tag == DT_SONAME || d_tag == DT_RPATH || d_tag == DT_RUNPATH:
+		Elf64_Addr  d_name as NullTermString * (stringOffset(sh_off, sh_link, 8, is_little_endian));
+		break;
+	default:
+		Elf64_Addr  d_ptr;
+};
 
+case_union DynamicValue32
+{
+	case d_tag == DT_FLAGS:
+		enum EFlags32 : Elf32_Word
+		{
+			DF_ORIGIN = 0x00000001,
+			DF_SYMBOLIC = 0x00000002,
+			DF_TEXTREL = 0x00000004,
+			DF_BIND_NOW = 0x00000008,
+			DF_STATIC_TLS = 0x00000010
+		}d_val;
+		break;
+	case d_tag == DT_FLAGS_1:
+		enum EFlags32_1 : Elf32_Word
+		{
+			DF_1_NOW = 0x00000001,
+			DF_1_GLOBAL = 0x00000002,
+			DF_1_GROUP = 0x00000004,
+			DF_1_NODELETE = 0x00000008,
+			DF_1_LOADFLTR = 0x00000010,
+			DF_1_INITFIRST = 0x00000020,
+			DF_1_NOOPEN = 0x00000040,
+			DF_1_ORIGIN = 0x00000080,
+			DF_1_DIRECT = 0x00000100,
+			DF_1_TRANS = 0x00000200,
+			DF_1_INTERPOSE = 0x00000400,
+			DF_1_NODEFLIB = 0x00000800,
+			DF_1_NODUMP = 0x00001000,
+			DF_1_CONFALT = 0x00002000,
+			DF_1_ENDFILTEE = 0x00004000,
+			DF_1_DISPRELDNE = 0x00008000,
+			DF_1_DISPRELPND = 0x00010000,
+			DF_1_NODIRECT = 0x00020000,
+			DF_1_IGNMULDEF = 0x00040000,
+			DF_1_NOKSYMS = 0x00080000,
+			DF_1_NOHDR = 0x00100000,
+			DF_1_EDITED = 0x00200000,
+			DF_1_NORELOC = 0x00400000,
+			DF_1_SYMINTPOSE = 0x00800000,
+			DF_1_GLOBAUDIT = 0x01000000,
+			DF_1_SINGLETON = 0x02000000,
+			DF_1_STUB = 0x04000000,
+			DF_1_PIE = 0x08000000
+		}d_val;
+		break;
+	case d_tag == DT_NEEDED || d_tag == DT_SONAME || d_tag == DT_RPATH || d_tag == DT_RUNPATH:
+		Elf32_Addr  d_name as NullTermString * (stringOffset(sh_off, sh_link, 4, is_little_endian));
+		break;
+	default:
+		Elf32_Addr  d_ptr;
+};
+
+struct Elf64_Dyn 
+{
+	enum EDynamicType64 : __int64
+	{
+		DT_NULL = 0,
+		DT_NEEDED = 1,
+		DT_PLTRELSZ = 2,
+		DT_PLTGOT = 3,
+		DT_HASH = 4,
+		DT_STRTAB = 5,
+		DT_SYMTAB = 6,
+		DT_RELA = 7,
+		DT_RELASZ = 8,
+		DT_RELAENT = 9,
+		DT_STRSZ = 10,
+		DT_SYMENT = 11,
+		DT_INIT = 12,
+		DT_FINI = 13,
+		DT_SONAME = 14,
+		DT_RPATH = 15,
+		DT_SYMBOLIC = 16,
+		DT_REL = 17,
+		DT_RELSZ = 18,
+		DT_RELENT = 19,
+		DT_PLTREL = 20,
+		DT_DEBUG = 21,
+		DT_TEXTREL = 22,
+		DT_JMPREL = 23,
+		DT_BIND_NOW = 24,
+		DT_INIT_ARRAY = 25,
+		DT_FINI_ARRAY = 26,
+		DT_INIT_ARRAYSZ = 27,
+		DT_FINI_ARRAYSZ = 28,
+		DT_RUNPATH = 29,
+		DT_FLAGS = 30,
+		DT_ENCODING = 32,
+		DT_PREINIT_ARRAY = 32,
+		DT_PREINIT_ARRAYSZ = 33,
+		DT_SYMTAB_SHNDX = 34,
+		DT_RELRSZ = 35,
+		DT_RELR = 36,
+		DT_RELRENT = 37,
+		DT_LOOS = 0x6000000D,
+		DT_HIOS = 0x6FFFF000,
+		DT_VALRNGLO = 0x6FFFFD00,
+		DT_GNU_PRELINKED = 0x6FFFFDF5,
+		DT_GNU_CONFLICTSZ = 0x6FFFFDF6,
+		DT_GNU_LIBLISTSZ = 0x6FFFFDF7,
+		DT_CHECKSUM = 0x6FFFFDF8,
+		DT_PLTPADSZ = 0x6FFFFDF9,
+		DT_MOVEENT = 0x6FFFFDFA,
+		DT_MOVESZ = 0x6FFFFDFB,
+		DT_FEATURE_1 = 0x6FFFFDFC,
+		DT_POSFLAG_1 = 0x6FFFFDFD,
+		DT_SYMINSZ = 0x6FFFFDFE,
+		DT_SYMINENT = 0x6FFFFDFF,
+		DT_GNU_HASH = 0x6FFFFEF5,
+		DT_TLSDESC_PLT = 0x6FFFFEF6,
+		DT_TLSDESC_GOT = 0x6FFFFEF7,
+		DT_GNU_CONFLICT = 0x6FFFFEF8,
+		DT_GNU_LIBLIST = 0x6FFFFEF9,
+		DT_CONFIG = 0x6FFFFEFA,
+		DT_DEPAUDIT = 0x6FFFFEFB,
+		DT_AUDIT = 0x6FFFFEFC,
+		DT_PLTPAD = 0x6FFFFEFD,
+		DT_MOVETAB = 0x6FFFFEFE,
+		DT_SYMINFO = 0x6FFFFEFF,
+		DT_VERSYM = 0x6FFFFFF0,
+		DT_RELACOUNT = 0x6FFFFFF9,
+		DT_RELCOUNT = 0x6FFFFFFA,
+		DT_FLAGS_1 = 0x6FFFFFFB,
+		DT_VERDEF = 0x6FFFFFFC,
+		DT_VERDEFNUM = 0x6FFFFFFD,
+		DT_VERNEED = 0x6FFFFFFE,
+		DT_VERNEEDNUM = 0x6FFFFFFF,
+		DT_LOPROC = 0x70000000,
+		DT_HIPROC = 0x7FFFFFFF,
+	}d_tag;
+	DynamicValue64 d_un;
+};
+
+struct Elf32_Dyn
+{
+	enum EDynamicType32 : int
+	{
+		DT_NULL = 0,
+		DT_NEEDED = 1,
+		DT_PLTRELSZ = 2,
+		DT_PLTGOT = 3,
+		DT_HASH = 4,
+		DT_STRTAB = 5,
+		DT_SYMTAB = 6,
+		DT_RELA = 7,
+		DT_RELASZ = 8,
+		DT_RELAENT = 9,
+		DT_STRSZ = 10,
+		DT_SYMENT = 11,
+		DT_INIT = 12,
+		DT_FINI = 13,
+		DT_SONAME = 14,
+		DT_RPATH = 15,
+		DT_SYMBOLIC = 16,
+		DT_REL = 17,
+		DT_RELSZ = 18,
+		DT_RELENT = 19,
+		DT_PLTREL = 20,
+		DT_DEBUG = 21,
+		DT_TEXTREL = 22,
+		DT_JMPREL = 23,
+		DT_BIND_NOW = 24,
+		DT_INIT_ARRAY = 25,
+		DT_FINI_ARRAY = 26,
+		DT_INIT_ARRAYSZ = 27,
+		DT_FINI_ARRAYSZ = 28,
+		DT_RUNPATH = 29,
+		DT_FLAGS = 30,
+		DT_ENCODING = 32,
+		DT_PREINIT_ARRAY = 32,
+		DT_PREINIT_ARRAYSZ = 33,
+		DT_SYMTAB_SHNDX = 34,
+		DT_RELRSZ = 35,
+		DT_RELR = 36,
+		DT_RELRENT = 37,
+		DT_LOOS = 0x6000000D,
+		DT_HIOS = 0x6FFFF000,
+		DT_VALRNGLO = 0x6FFFFD00,
+		DT_GNU_PRELINKED = 0x6FFFFDF5,
+		DT_GNU_CONFLICTSZ = 0x6FFFFDF6,
+		DT_GNU_LIBLISTSZ = 0x6FFFFDF7,
+		DT_CHECKSUM = 0x6FFFFDF8,
+		DT_PLTPADSZ = 0x6FFFFDF9,
+		DT_MOVEENT = 0x6FFFFDFA,
+		DT_MOVESZ = 0x6FFFFDFB,
+		DT_FEATURE_1 = 0x6FFFFDFC,
+		DT_POSFLAG_1 = 0x6FFFFDFD,
+		DT_SYMINSZ = 0x6FFFFDFE,
+		DT_SYMINENT = 0x6FFFFDFF,
+		DT_GNU_HASH = 0x6FFFFEF5,
+		DT_TLSDESC_PLT = 0x6FFFFEF6,
+		DT_TLSDESC_GOT = 0x6FFFFEF7,
+		DT_GNU_CONFLICT = 0x6FFFFEF8,
+		DT_GNU_LIBLIST = 0x6FFFFEF9,
+		DT_CONFIG = 0x6FFFFEFA,
+		DT_DEPAUDIT = 0x6FFFFEFB,
+		DT_AUDIT = 0x6FFFFEFC,
+		DT_PLTPAD = 0x6FFFFEFD,
+		DT_MOVETAB = 0x6FFFFEFE,
+		DT_SYMINFO = 0x6FFFFEFF,
+		DT_VERSYM = 0x6FFFFFF0,
+		DT_RELACOUNT = 0x6FFFFFF9,
+		DT_RELCOUNT = 0x6FFFFFFA,
+		DT_FLAGS_1 = 0x6FFFFFFB,
+		DT_VERDEF = 0x6FFFFFFC,
+		DT_VERDEFNUM = 0x6FFFFFFD,
+		DT_VERNEED = 0x6FFFFFFE,
+		DT_VERNEEDNUM = 0x6FFFFFFF,
+		DT_LOPROC = 0x70000000,
+		DT_HIPROC = 0x7FFFFFFF,
+	}d_tag;
+	DynamicValue32 d_un;
+};
+
+struct ElfDynamicSection32
+{
+	Elf32_Dyn dynamic[sh_size / 8];
+};
+
+struct ElfDynamicSection64
+{
+	Elf64_Dyn dynamic[sh_size / 16] ;
+};
+
+enum ERelaType64 : uint64
+{
+    R_X86_64_NONE,
+	R_X86_64_64,
+	R_X86_64_PC32,
+	R_X86_64_GOT32,
+	R_X86_64_PLT32,
+	R_X86_64_COPY,
+	R_X86_64_GLOB_DAT,
+	R_X86_64_JUMP_SLOT,
+	R_X86_64_RELATIVE,
+	R_X86_64_GOTPCREL,
+	R_X86_64_32,
+	R_X86_64_32S,
+	R_X86_64_16,
+	R_X86_64_PC16,
+	R_X86_64_8,
+	R_X86_64_PC8,
+	R_X86_64_DTPMOD64,
+	R_X86_64_DTPOFF64,
+	R_X86_64_TPOFF64,
+	R_X86_64_TLSGD,
+	R_X86_64_TLSLD,
+	R_X86_64_DTPOFF32,
+	R_X86_64_GOTTPOFF,
+	R_X86_64_TPOFF32,
+	R_X86_64_PC64,
+	R_X86_64_GOTOFF64,
+	R_X86_64_GOTPC32,
+	R_X86_64_IRELATIVE
+};
+
+enum ERelaType32 : int
+{
+	R_X86_64_NONE,
+	R_X86_64_64,
+	R_X86_64_PC32,
+	R_X86_64_GOT32,
+	R_X86_64_PLT32,
+	R_X86_64_COPY,
+	R_X86_64_GLOB_DAT,
+	R_X86_64_JUMP_SLOT,
+	R_X86_64_RELATIVE,
+	R_X86_64_GOTPCREL,
+	R_X86_64_32,
+	R_X86_64_32S,
+	R_X86_64_16,
+	R_X86_64_PC16,
+	R_X86_64_8,
+	R_X86_64_PC8,
+	R_X86_64_DTPMOD64,
+	R_X86_64_DTPOFF64,
+	R_X86_64_TPOFF64,
+	R_X86_64_TLSGD,
+	R_X86_64_TLSLD,
+	R_X86_64_DTPOFF32,
+	R_X86_64_GOTTPOFF,
+	R_X86_64_TPOFF32,
+	R_X86_64_PC64,
+	R_X86_64_GOTOFF64,
+	R_X86_64_GOTPC32,
+	R_X86_64_IRELATIVE
+};
+
+
+struct Elf32_Rel
+{
+	Elf32_Addr  r_offset;
+	Elf32_Word  r_info;
+};
+
+struct Elf64_Rel
+{
+	Elf64_Addr   r_offset;
+	Elf64_QWord  r_info;
+};
+
+struct Elf32_Rela
+{
+	Elf32_Addr  r_offset;
+//	Elf32_Word	r_info;
+	union Info
+	{
+		struct
+		{
+			ERelaType32 type : 8;
+			Elf32_Word symbol : 24;
+		}info;
+		[format("b2w64arf0")]
+		Elf32_Word  bmInfo;
+	}r_info;
+	int r_addend;
+};
+
+struct Elf64_Rela 
+{
+	Elf64_Addr   r_offset;
+//	Elf64_QWord  r_info;
+	union Info
+	{
+		struct
+		{
+			ERelaType64 type : 32;
+			uint64 symbol : 32;
+		}info;
+		[format("b2w64arf0")]
+		uint64  bmInfo;
+	}r_info;
+
+	int64 r_addend;
+};
+
+struct ElfRelSection32
+{
+	Elf32_Rel rel[sh_size / sizeof(Elf32_Rel)];
+};
+
+struct ElfRelSection64
+{
+	Elf64_Rel rel[sh_size / sizeof(Elf64_Rel)];
+};
+
+struct ElfRelocationsSection32
+{
+	Elf32_Rela rela[sh_size / sizeof(Elf32_Rela)];
+};
+
+struct ElfRelocationsSection64
+{
+	Elf64_Rela rela[sh_size / sizeof(Elf64_Rela)];
+};
+
+
+struct Elf64_Nhdr 
+{
+	Elf64_Word  n_namesz;
+	Elf64_Word  n_descsz;
+	Elf64_Word  n_type;
+	char name[n_namesz];
+	unsigned char padding[(4 - (n_namesz % 4)) & -5];
+	char desc[n_descsz];
+	unsigned char padding1[(4 - (n_descsz % 4)) & -5];
+};
+
+struct Elf64_GNU_Hash
+{
+	Elf64_Word  nbuckets;
+	Elf64_Word  symndx;
+	Elf64_Word  maskwords;
+	Elf64_Word  shift2;
+};
+
+[display(sh_name.data)]
 struct ElfSectionHeader32
 {
-	Elf32_Word sh_name;
+	Elf32_Word sh_name as NullTermString *(stringOffset(sh_off, sti, 4, is_little_endian));
 	SectionHeaderType sh_type;
 	SectionHeaderFlags sh_flags;
 
@@ -120,10 +608,20 @@ struct ElfSectionHeader32
 
 	case_union
 	{
-	case sh_type == SHT_SYMTAB:
+	case sh_type == SHT_SYMTAB || sh_type == SHT_DYNSYM:
 		Elf32_Off sym_table as ElfSymbolSection32 *;
 	case sh_type == SHT_STRTAB:
 		Elf32_Off str_table as ElfStringSection32 *;
+	case sh_type == SHT_DYNAMIC:
+		Elf32_Off dyn_table as ElfDynamicSection32 *;
+	case sh_type == SHT_RELA:
+		Elf32_Off rela_table as ElfRelocationsSection32 *;
+	case sh_type == SHT_REL:
+		Elf32_Off rel_table as ElfRelSection32 *;
+	case sh_type == SHT_NOTE:
+		Elf32_Off note as Elf64_Nhdr *;
+	case sh_type == SHT_HASH || sh_type == SUNW_SIGNATURE:
+		Elf32_Off note as Elf64_GNU_Hash *;
 	default:
 		Elf32_Off sh_offset_value;
 	}sh_offset;
@@ -131,27 +629,42 @@ struct ElfSectionHeader32
 	Elf32_Word sh_size;
 	Elf32_Word sh_link;
 	Elf32_Word sh_info;
+	Elf32_Word sh_addralign;
+	Elf32_Word sh_entsize;
 };
 
+[display(sh_name.data)]
 struct ElfSectionHeader64
 {
-	Elf64_Word sh_name;
+	Elf64_Word sh_name as NullTermString *(stringOffset(sh_off, sti, 8, is_little_endian));
+
 	SectionHeaderType sh_type;
-	SectionHeaderFlags sh_flags;
+	SectionHeaderFlags64 sh_flags;
 
 	Elf64_Addr sh_addrs;
 
 	case_union
 	{
-	case sh_type == SHT_SYMTAB:
+	case sh_type == SHT_SYMTAB || sh_type == SHT_DYNSYM:
 		Elf64_Off sym_table as ElfSymbolSection64 *;
 	case sh_type == SHT_STRTAB:
 		Elf64_Off str_table as ElfStringSection64 *;
+	case sh_type == SHT_DYNAMIC:
+		Elf64_Off dyn_table as ElfDynamicSection64 *;
+	case sh_type == SHT_RELA:
+		Elf64_Off rela_table as ElfRelocationsSection64 *;
+	case sh_type == SHT_REL:
+		Elf64_Off rel_table as ElfRelSection64 *;
+	case sh_type == SHT_NOTE:
+		Elf64_Off note as Elf64_Nhdr *;
+	case sh_type == SHT_HASH || sh_type == SUNW_SIGNATURE:
+		Elf64_Off note as Elf64_GNU_Hash *;
+
 	default:
 		Elf64_Off sh_offset_value;
 	}sh_offset;
 
-	Elf64_Word sh_size;
+	Elf64_QWord sh_size;
 	Elf64_Word sh_link;
 	Elf64_Word sh_info;
 	Elf64_QWord sh_addralign;
@@ -180,6 +693,13 @@ enum ProgramHeaderType :Elf32_Word
 	PT_NOTE = 4,
 	PT_SHLIB = 5,
 	PT_PHDR = 6,
+	PT_TLS = 7,
+	PT_LOOS = 0x60000000,
+	PT_GNU_EH_FRAME = 0x6474e550,
+	PT_GNU_STACK = 0x6474e551,
+	PT_GNU_RELRO = 0x6474e552,
+	PT_GNU_PROPERTY = 0x6474e553,
+	PT_HIOS = 0x6FFFFFFF,
 	PT_LOPROC = 0x70000000,
 	PT_HIPROC = 0x7ffffff
 };
@@ -233,26 +753,125 @@ struct ElfProgramHeader64Array
 	ElfProgramHeader64 headers[phe_num];
 };
 
+struct AsciiString
+{
+	char s;
+	if (s == 0)
+		$break_array(true);
+	else
+		data = data + format("{0c}", s);
+};
+
+[display(data)]
+struct NullTermString
+{
+	var data = "";
+	AsciiString str[*];
+};
+
+[display(data)]
+struct NullTermStringArray
+{
+	var data = "";
+
+	AsciiString str[*];
+
+	if (current_offset >= last_offset)
+		$break_array(true);
+};
 
 /*
 * Different sections
 */
+javascript
+{
+  function stringOffset(sh_off, sh_link, addrSize, littleEndian)
+  {
+		let bytes = document.Read(sh_off + sh_link * (addrSize * 6 + 16) + (8 + addrSize * 2), addrSize);
+		let offset = 0;
+
+		if (littleEndian) {
+			for (let i = addrSize - 1; i >= 0; i--) {
+				offset = (offset << 8) | Number(bytes[i]);
+			}
+		}
+		else {
+			for (let i = 0; i < addrSize; i++) {
+				offset = (offset << 8) | Number(bytes[i]);
+			}
+		}
+
+		return offset;
+  }
+};
 
 // Symbol Table
+enum EInfoType : unsigned char
+{
+	STT_NOTYPE = 0,
+	STT_OBJECT = 1,
+	STT_FUNC = 2,
+	STT_SECTION = 3,
+	STT_FILE = 4,
+	STT_COMMON = 5,
+	STT_TLS = 6,
+	STT_NUM = 7,
+	STT_LOOS = 10,
+	STT_GNU_IFUNC = 11,
+	STT_HIOS = 12,
+	STT_LOPROC = 13,
+	STT_HIPROC = 15
+};
+
+enum EInfoBind : unsigned char
+{
+	STB_LOCAL = 0,
+	STB_GLOBAL = 1,
+	STB_WEAK = 2,
+	STB_NUM = 3,
+	STB_LOOS = 10,
+	STB_GNU_UNIQUE = 10,
+	STB_HIOS = 12,
+	STB_LOPROC = 13,
+	STB_HIPROC = 15
+};
+
+[display(st_name.data)]
 struct ElfSymbolSectionEntry32
 {
-	Elf32_Word st_name;
+	Elf32_Word st_name as NullTermString *(stringOffset(sh_off, sh_link, 4, is_little_endian));
 	Elf32_Addr st_value;
 	Elf32_Word st_size;
-	unsigned char st_info;
+	union StInfo
+	{
+		struct
+		{
+			EInfoType type : 4;
+			EInfoBind bind : 4;
+		}info;
+		[format("b2w8arf0")]
+		unsigned char  bmInfo;
+	}st_info;
 	unsigned char st_other;
 	Elf32_Half st_shndx;
 };
 
+[display(st_name.data)]
 struct ElfSymbolSectionEntry64
 {
-	Elf64_Word st_name;
-	unsigned char st_info;
+	Elf64_Word st_name as NullTermString *(stringOffset(sh_off, sh_link, 8, is_little_endian));
+
+	union StInfo
+	{
+		struct
+		{
+			EInfoType type: 4;
+			EInfoBind bind : 4;
+		}info;
+		[format("b2w8arf0")]
+		unsigned char  bmstInfo;
+	}st_info;
+
 	unsigned char st_other;
 	Elf64_Half st_shndx;
 	Elf64_Addr st_value;
@@ -276,12 +895,14 @@ struct ElfSymbolSection64
 
 struct ElfStringSection32
 {
-	char symbols[sh_size];
+	var last_offset = current_offset + sh_size;
+	NullTermStringArray strings[*];
 };
 
 struct ElfStringSection64
 {
-	char symbols[sh_size];
+	var last_offset  = current_offset  + sh_size;
+	NullTermStringArray strings[*];
 };
 
 /*
@@ -400,14 +1021,17 @@ enum ElfVersion :Elf32_Word
 	EV_CURRENT = 1
 };
 
+
 public struct ELF_HEADER
 {
 	ElfIdent ident;
 
 	$assert(ident.pre_id == 0x7f, "Not an ELF file");
 	$assert(ident.id == "ELF", "Not an ELF file");
+	var is_big_endian = ident.data_encoding == ELFDATA2MSB;
+	var is_little_endian = !is_big_endian;
 
-	if (ident.data_encoding == ELFDATA2MSB)
+	if (is_big_endian)
 	{
 		#pragma byte_order(BigEndian)
 	}
